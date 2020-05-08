@@ -20,7 +20,10 @@ pipeline {
     }
    }
    steps {
-    sh 'python get_features.py'
+    sh '''
+    pip install -r requirements.txt
+    python get_features.py
+    '''
    }
    post {
     success {
