@@ -6,6 +6,7 @@ import re
 import os
 import pathlib
 import textwrap
+import html
 
 username = os.environ.get("JIRA_USERNAME")
 password = os.environ.get("JIRA_PASSWORD")
@@ -49,7 +50,9 @@ def parse_zephyr_test_steps(json_response):
         steps = []
         clean = re.compile('<.*?>')
         for step in json_response['stepBeanCollection']:
-            steps.append(re.sub(clean, '', step['htmlStep']))
+            step_str = re.sub(clean, '', step['htmlStep'])
+            step_str = html.unescape(step_str)
+            steps.append(step_str)
         return steps
 
 
