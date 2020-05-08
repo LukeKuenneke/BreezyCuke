@@ -40,7 +40,7 @@ if env_var_errors:
 
 save_directory = str(os.path.dirname(os.path.dirname(
     os.path.realpath(__file__)) + '/features/')).replace('\\', '/')
-1
+
 if not os.path.exists(save_directory):
     os.makedirs(save_directory)
 
