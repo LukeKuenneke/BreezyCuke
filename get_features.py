@@ -102,7 +102,7 @@ zephyr_token = re.findall(r'"(.*?)"', re.search('zEncKeyVal = "\S+"', requests.g
                                                                                    auth=HTTPBasicAuth(username, password), cookies=jira._session.cookies).text).group(0))[0]
 jira._session.headers.update({str('AO-7DEABF').lower(): zephyr_token})
 
-tests = jira.search_issues(jira_query)
+tests = jira.search_issues(jira_query, maxResults=999999)
 
 for test in tests:
     steps = get_zephyr_test_steps(
