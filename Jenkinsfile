@@ -5,7 +5,7 @@ pipeline {
   }
     
   parameters {
-    string(defaultValue: "", description: 'Jira Query', name: '')
+    string(defaultValue: "", description: 'Jira Query', name: 'jiraQuery')
   }
 
   environment {
