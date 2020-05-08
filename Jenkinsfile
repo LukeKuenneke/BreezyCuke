@@ -21,7 +21,7 @@ pipeline {
    }
    steps {
     sh '''
-    pip install -r requirements.txt
+    sudo pip install -r requirements.txt
     python get_features.py
     '''
    }
