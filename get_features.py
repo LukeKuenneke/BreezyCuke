@@ -75,25 +75,37 @@ def format_tags_as_str(p_tags):
     return tags
 
 
-def format_steps_as_str(p_steps):
-    steps = ""
-
-    for step in p_steps:
-        steps += step + "\n"
-
-    return steps
-
-
 def save_feature_file(feature_text, tags, scenario, steps, file_name):
     with open(save_directory + '/' + file_name + '.feature', 'w') as file:
-        file.writelines(textwrap.dedent(f"""\
-Feature: {feature_text}
-    {format_tags_as_str(tags)}
-    Scenario: {scenario}
-    {format_steps_as_str(steps)}
-                        """))
+        file.write("Feature: " + feature_text)
+        file.write("\n\t")
+        file.write(format_tags_as_str(tags))
+        file.write("\n\t")
+        file.write("Scenario: " + scenario)
+        file.write("\n")
+
+        for step in steps:
+            file.write("\t\t")
+            file.write(step)
+            file.write("\n")
 
         print('Wrote: ' + save_directory + '/' + file_name + '.feature')
+
+def get_fix_versions(jira_obj):
+    results = []
+
+    for fix_version in jira_obj.fields.fixVersions:
+        results.append(fix_version.name.replace(" ", "-"))
+
+    return results
+
+def get_issue_links(jira_obj):
+    results = []
+
+    for issue_link in jira_obj.fields.issuelinks:
+        results.append(issue_link.outwardIssue.key)
+
+    return results
 # End Helper Functions
 
 
@@ -110,8 +122,10 @@ for test in tests:
     if steps is None:
         print('Error: no steps found for Jira! ' + test.key)
     else:
+        fix_versions = get_fix_versions(test)
+        issue_links = get_issue_links(test)
         summary = test.fields.summary
         file_name = test.key
-        labels = test.fields.labels
+        tags = test.fields.labels + fix_versions + issue_links + [test.key]
 
-        save_feature_file(file_name, labels, summary, steps, file_name)
+        save_feature_file(summary, tags, summary, steps, file_name)
