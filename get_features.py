@@ -1,12 +1,10 @@
+import os
+import re
+import json
+import html
+import requests
 from requests.auth import HTTPBasicAuth
 from jira import JIRA
-import json
-import requests
-import re
-import os
-import pathlib
-import textwrap
-import html
 
 username = os.environ.get("JIRA_USERNAME")
 password = os.environ.get("JIRA_PASSWORD")
@@ -70,22 +68,26 @@ def format_tags_as_str(p_tags):
     tags = ""
 
     for tag in p_tags:
-        tags += "@" + tag + " "
+        tags += (str("@" + tag).replace(" ", "-") + " ")
 
     return tags
 
 
 def save_feature_file(feature_text, tags, scenario, steps, file_name):
-    with open(save_directory + '/' + file_name + '.feature', 'w') as file:
-        file.write("Feature: " + feature_text)
-        file.write("\n\t")
+    with open(save_directory + '/' + file_name + '.feature', 'w', encoding="utf-8") as file:
         file.write(format_tags_as_str(tags))
+        file.write("\n")
+        file.write("Feature: " + feature_text)
         file.write("\n\t")
         file.write("Scenario: " + scenario)
         file.write("\n")
 
         for step in steps:
             file.write("\t\t")
+            step.replace("GIVEN", "Given")
+            step.replace("WHEN", "When")
+            step.replace("THEN", "Then")
+            step.replace("AND", "And")
             file.write(step)
             file.write("\n")
 
@@ -103,7 +105,8 @@ def get_issue_links(jira_obj):
     results = []
 
     for issue_link in jira_obj.fields.issuelinks:
-        results.append(issue_link.outwardIssue.key)
+        if (hasattr(issue_link, 'outwardIssue')):
+            results.append(issue_link.outwardIssue.key)
 
     return results
 # End Helper Functions
@@ -127,5 +130,15 @@ for test in tests:
         summary = test.fields.summary
         file_name = test.key
         tags = test.fields.labels + fix_versions + issue_links + [test.key]
-
-        save_feature_file(summary, tags, summary, steps, file_name)
+        try:
+            save_feature_file(summary, tags, summary, steps, file_name)
+        except:
+            print('Error: Failed to write Feature file!')
+            print('Filename: ' + file_name)
+            print('Tags: ' + tags)
+            print('Summary: ' + summary)
+            print('Issue Links: ' + issue_links)
+            print('Fix Versions: ' + fix_versions)
+            
+            
+            
