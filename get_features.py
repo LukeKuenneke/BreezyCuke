@@ -84,10 +84,10 @@ def save_feature_file(feature_text, tags, scenario, steps, file_name):
 
         for step in steps:
             file.write("\t\t")
-            step.replace("GIVEN", "Given")
-            step.replace("WHEN", "When")
-            step.replace("THEN", "Then")
-            step.replace("AND", "And")
+            step = step.replace("GIVEN", "Given")
+            step = step.replace("WHEN", "When")
+            step = step.replace("THEN", "Then")
+            step = step.replace("AND", "And")
             file.write(step)
             file.write("\n")
 
