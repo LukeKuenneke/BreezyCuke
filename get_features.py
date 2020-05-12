@@ -6,43 +6,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 from jira import JIRA
 
-username = os.environ.get("JIRA_USERNAME")
-password = os.environ.get("JIRA_PASSWORD")
-jira_endpoint = os.environ.get("JIRA_URL")
-jira_query = os.environ.get("JIRA_QUERY")
 
-env_var_errors = False
-env_var_messages = []
-
-if not username:
-    env_var_messages.append('JIRA_USERNAME')
-    env_var_errors = True
-
-if not password:
-    env_var_messages.append('JIRA_PASSWORD')
-    env_var_errors = True
-
-if not jira_endpoint:
-    env_var_messages.append('JIRA_URL')
-    env_var_errors = True
-
-if not jira_query:
-    env_var_messages.append('JIRA_QUERY')
-    env_var_errors = True
-
-if env_var_errors:
-    print("Error, you need to set these env variables!")
-    for message in env_var_messages:
-        print(message)
-    exit(1)
-
-save_directory = str(os.path.dirname(os.path.dirname(
-    os.path.realpath(__file__)) + '/features/')).replace('\\', '/')
-
-if not os.path.exists(save_directory):
-    os.makedirs(save_directory)
-
-# Begin Helper Functions
 def parse_zephyr_test_steps(json_response):
     if len(json_response['stepBeanCollection']) >= 1:
         steps = []
@@ -95,8 +59,9 @@ def save_feature_file(feature_text, tags, scenario, steps, description, file_nam
         file.write(format_tags_as_str(tags))
         file.write("\n")
         file.write("Feature: " + feature_text)
-        file.write("\n")
-        file.write(format_description_as_comment(description))
+        if type(description) is str:
+            file.write("\n")
+            file.write(format_description_as_comment(description))
         file.write("\n\t")
         file.write("Scenario: " + scenario)
         file.write("\n")
@@ -126,7 +91,43 @@ def get_issue_links(jira_obj):
             results.append(issue_link.outwardIssue.key)
 
     return results
-# End Helper Functions
+
+
+# BEGIN MAIN
+username = os.environ.get("JIRA_USERNAME")
+password = os.environ.get("JIRA_PASSWORD")
+jira_endpoint = os.environ.get("JIRA_URL")
+jira_query = os.environ.get("JIRA_QUERY")
+env_var_errors = False
+env_var_messages = []
+
+if not username:
+    env_var_messages.append('JIRA_USERNAME')
+    env_var_errors = True
+
+if not password:
+    env_var_messages.append('JIRA_PASSWORD')
+    env_var_errors = True
+
+if not jira_endpoint:
+    env_var_messages.append('JIRA_URL')
+    env_var_errors = True
+
+if not jira_query:
+    env_var_messages.append('JIRA_QUERY')
+    env_var_errors = True
+
+if env_var_errors:
+    print("Error, you need to set these env variables!")
+    for message in env_var_messages:
+        print(message)
+    exit(1)
+
+save_directory = str(os.path.dirname(os.path.dirname(
+    os.path.realpath(__file__)) + '/features/')).replace('\\', '/')
+
+if not os.path.exists(save_directory):
+    os.makedirs(save_directory)
 
 
 jira = JIRA(jira_endpoint, basic_auth=(username, password))
