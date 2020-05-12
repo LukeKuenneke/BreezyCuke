@@ -73,25 +73,41 @@ def format_tags_as_str(p_tags):
     return tags
 
 
-def save_feature_file(feature_text, tags, scenario, steps, file_name):
+def format_description_as_comment(description):
+    formatted_desc = ""
+
+    for line in description.split('\n'):
+        formatted_desc += "\t# " + line
+
+    return formatted_desc
+
+
+def format_step(step):
+    step = step.replace("GIVEN", "Given")
+    step = step.replace("WHEN", "When")
+    step = step.replace("THEN", "Then")
+    step = step.replace("AND", "And")
+    return step
+
+
+def save_feature_file(feature_text, tags, scenario, steps, description, file_name):
     with open(save_directory + '/' + file_name + '.feature', 'w', encoding="utf-8") as file:
         file.write(format_tags_as_str(tags))
         file.write("\n")
         file.write("Feature: " + feature_text)
+        file.write("\n")
+        file.write(format_description_as_comment(description))
         file.write("\n\t")
         file.write("Scenario: " + scenario)
         file.write("\n")
 
         for step in steps:
             file.write("\t\t")
-            step = step.replace("GIVEN", "Given")
-            step = step.replace("WHEN", "When")
-            step = step.replace("THEN", "Then")
-            step = step.replace("AND", "And")
-            file.write(step)
+            file.write(format_step(step))
             file.write("\n")
 
         print('Wrote: ' + save_directory + '/' + file_name + '.feature')
+
 
 def get_fix_versions(jira_obj):
     results = []
@@ -100,6 +116,7 @@ def get_fix_versions(jira_obj):
         results.append(fix_version.name.replace(" ", "-"))
 
     return results
+
 
 def get_issue_links(jira_obj):
     results = []
@@ -125,13 +142,15 @@ for test in tests:
     if steps is None:
         print('Error: no steps found for Jira! ' + test.key)
     else:
+        description = test.fields.description
         fix_versions = get_fix_versions(test)
         issue_links = get_issue_links(test)
         summary = test.fields.summary
         file_name = test.key
         tags = test.fields.labels + fix_versions + issue_links + [test.key]
         try:
-            save_feature_file(summary, tags, summary, steps, file_name)
+            save_feature_file(summary, tags, summary,
+                              steps, description, file_name)
         except:
             print('Error: Failed to write Feature file!')
             print('Filename: ' + file_name)
@@ -139,6 +158,3 @@ for test in tests:
             print('Summary: ' + summary)
             print('Issue Links: ' + issue_links)
             print('Fix Versions: ' + fix_versions)
-            
-            
-            
